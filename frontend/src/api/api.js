@@ -3,14 +3,44 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Constants from 'expo-constants';
 
+import { Platform } from 'react-native';
+
 // Dynamically resolve local computer IP from Expo Constants with fallback
 const getBaseUrl = () => {
-  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost || '';
-  const ip = hostUri ? hostUri.split(':')[0] : '10.36.219.100';
-  return `http://${ip}:5000/api`;
+  if (Platform.OS === 'web') {
+    return 'http://localhost:5000/api';
+  }
+
+  const hostUri =
+    Constants.expoConfig?.hostUri ||
+    Constants.manifest2?.extra?.expoGo?.debuggerHost ||
+    Constants.manifest?.debuggerHost ||
+    '';
+
+  let rawHost = hostUri ? hostUri.split(':')[0] : '';
+
+  // If running on Android simulator where host is localhost or 127.0.0.1
+  if (rawHost === 'localhost' || rawHost === '127.0.0.1' || !rawHost) {
+    if (Platform.OS === 'android') {
+      return 'http://10.0.2.2:5000/api';
+    }
+    if (Platform.OS === 'ios') {
+      return 'http://localhost:5000/api';
+    }
+    // Default fallback to computer's local Wi-Fi IP for physical phone
+    rawHost = '10.36.219.100';
+  }
+
+  // If tunnel host is detected (e.g. ngrok / exp.direct), fallback to local Wi-Fi IP
+  if (rawHost.includes('ngrok') || rawHost.includes('exp.direct')) {
+    rawHost = '10.36.219.100';
+  }
+
+  return `http://${rawHost}:5000/api`;
 };
 
 const API_BASE_URL = getBaseUrl();
+console.log('📡 API Base URL resolved to:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,

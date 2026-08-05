@@ -13,4 +13,6 @@ function App() {
   );
 }
 
-export default registerRootComponent(App);
+registerRootComponent(App);
+
+export default App;

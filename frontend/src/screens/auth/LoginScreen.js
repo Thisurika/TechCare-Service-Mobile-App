@@ -105,6 +105,23 @@ const LoginScreen = ({ navigation }) => {
             )}
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.demoButton}
+            onPress={async () => {
+              setEmail('testuser@techcare.com');
+              setPassword('password123');
+              setLoading(true);
+              const res = await login('testuser@techcare.com', 'password123');
+              setLoading(false);
+              if (!res.success) {
+                Alert.alert('Demo Login Failed', res.message);
+              }
+            }}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.demoButtonText}>⚡ Quick Demo Sign In</Text>
+          </TouchableOpacity>
+
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>OR</Text>
@@ -234,6 +251,20 @@ const styles = StyleSheet.create({
     fontSize: SIZES.lg,
     fontWeight: '700',
     color: COLORS.white,
+  },
+  demoButton: {
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    borderColor: COLORS.primary,
+    borderWidth: 1,
+    borderRadius: SIZES.radius,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  demoButtonText: {
+    fontSize: SIZES.md,
+    fontWeight: '700',
+    color: COLORS.primaryLight,
   },
   divider: {
     flexDirection: 'row',
