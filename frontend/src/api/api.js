@@ -1,8 +1,16 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Set local network IP address so physical phones, emulators, and web can all connect
-const API_BASE_URL = 'http://10.36.219.100:5000/api';
+import Constants from 'expo-constants';
+
+// Dynamically resolve local computer IP from Expo Constants with fallback
+const getBaseUrl = () => {
+  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost || '';
+  const ip = hostUri ? hostUri.split(':')[0] : '10.36.219.100';
+  return `http://${ip}:5000/api`;
+};
+
+const API_BASE_URL = getBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
