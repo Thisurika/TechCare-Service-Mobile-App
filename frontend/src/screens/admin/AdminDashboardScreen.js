@@ -43,7 +43,7 @@ const AdminDashboardScreen = ({ navigation }) => {
   };
 
   const formatCurrency = (amount) => {
-    return `₹${(amount || 0).toLocaleString('en-IN')}`;
+    return `Rs. ${(amount || 0).toLocaleString('en-IN')}`;
   };
 
   if (loading) {

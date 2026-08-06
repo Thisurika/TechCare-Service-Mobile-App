@@ -248,7 +248,7 @@ const AdminBookingDetailScreen = ({ route, navigation }) => {
 
       {/* Total Cost */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>💰 Total Cost (₹)</Text>
+        <Text style={styles.sectionTitle}>💰 Total Cost (Rs.)</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter total cost..."
