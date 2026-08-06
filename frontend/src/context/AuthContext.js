@@ -19,9 +19,22 @@ export const AuthProvider = ({ children }) => {
       const storedToken = await AsyncStorage.getItem('token');
       const storedUser = await AsyncStorage.getItem('user');
 
-      if (storedToken && storedUser) {
+      if (storedToken) {
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+
+        // Fetch fresh profile from backend
+        try {
+          const res = await authAPI.getProfile();
+          if (res.data?.data) {
+            setUser(res.data.data);
+            await AsyncStorage.setItem('user', JSON.stringify(res.data.data));
+          }
+        } catch (e) {
+          console.log('Error refreshing user profile:', e.message);
+        }
       }
     } catch (error) {
       console.error('Error loading auth:', error);
@@ -89,6 +102,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    try {
+      const res = await authAPI.getProfile();
+      if (res.data?.data) {
+        setUser(res.data.data);
+        await AsyncStorage.setItem('user', JSON.stringify(res.data.data));
+      }
+    } catch (error) {
+      console.log('Error in refreshProfile:', error.message);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -101,6 +126,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         updateUser,
+        refreshProfile,
       }}
     >
       {children}
