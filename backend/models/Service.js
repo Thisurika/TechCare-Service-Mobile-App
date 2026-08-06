@@ -34,6 +34,10 @@ const serviceSchema = new mongoose.Schema(
       type: String,
       default: 'build', // MaterialIcons name
     },
+    image: {
+      type: String,
+      default: '',
+    },
     isActive: {
       type: Boolean,
       default: true,

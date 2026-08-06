@@ -118,4 +118,26 @@ export const supportAPI = {
   getTips: () => api.get('/support/tips'),
 };
 
+// ======== ADMIN API ========
+export const adminAPI = {
+  // Dashboard
+  getStats: () => api.get('/admin/stats'),
+
+  // Users
+  getUsers: (params) => api.get('/admin/users', { params }),
+  getUserById: (id) => api.get(`/admin/users/${id}`),
+  deleteUser: (id) => api.delete(`/admin/users/${id}`),
+
+  // Bookings
+  getBookings: (params) => api.get('/admin/bookings', { params }),
+  getBookingById: (id) => api.get(`/admin/bookings/${id}`),
+  updateBooking: (id, data) => api.put(`/admin/bookings/${id}`, data),
+
+  // Services
+  getServices: () => api.get('/admin/services'),
+  createService: (data) => api.post('/admin/services', data),
+  updateService: (id, data) => api.put(`/admin/services/${id}`, data),
+  deleteService: (id) => api.delete(`/admin/services/${id}`),
+};
+
 export default api;

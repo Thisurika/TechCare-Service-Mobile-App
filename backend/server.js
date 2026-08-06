@@ -4,6 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const connectDB = require('./config/db');
+const seedDefaultAdmin = require('./seeds/adminSeed');
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
@@ -11,11 +12,14 @@ const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const supportRoutes = require('./routes/supportRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB and seed admin
+connectDB().then(() => {
+  seedDefaultAdmin();
+});
 
 // Middleware
 app.use(cors());
@@ -31,6 +35,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check route
 app.get('/', (req, res) => {
@@ -43,6 +48,7 @@ app.get('/', (req, res) => {
       bookings: '/api/bookings',
       notifications: '/api/notifications',
       support: '/api/support',
+      admin: '/api/admin',
     },
   });
 });

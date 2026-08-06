@@ -21,6 +21,14 @@ import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import SupportScreen from '../screens/support/SupportScreen';
 
+// Admin Screens
+import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
+import AdminUsersScreen from '../screens/admin/AdminUsersScreen';
+import AdminBookingsScreen from '../screens/admin/AdminBookingsScreen';
+import AdminBookingDetailScreen from '../screens/admin/AdminBookingDetailScreen';
+import AdminServicesScreen from '../screens/admin/AdminServicesScreen';
+import AdminServiceFormScreen from '../screens/admin/AdminServiceFormScreen';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -32,6 +40,11 @@ const TabIcon = ({ name, focused, color }) => {
     Bookings: '📋',
     Notifications: '🔔',
     Profile: '👤',
+    // Admin tabs
+    Dashboard: '📊',
+    Users: '👥',
+    AdminBookings: '📋',
+    AdminServices: '🔧',
   };
 
   return (
@@ -145,7 +158,93 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
-// Main Tab Navigator
+// ============ ADMIN STACKS ============
+
+// Admin Dashboard Stack
+const AdminDashboardStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: COLORS.background },
+      headerTintColor: COLORS.white,
+      headerTitleStyle: { fontWeight: '700' },
+      contentStyle: { backgroundColor: COLORS.background },
+    }}
+  >
+    <Stack.Screen
+      name="AdminDashboardMain"
+      component={AdminDashboardScreen}
+      options={{ headerShown: false }}
+    />
+  </Stack.Navigator>
+);
+
+// Admin Users Stack
+const AdminUsersStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: COLORS.background },
+      headerTintColor: COLORS.white,
+      headerTitleStyle: { fontWeight: '700' },
+      contentStyle: { backgroundColor: COLORS.background },
+    }}
+  >
+    <Stack.Screen
+      name="AdminUsersMain"
+      component={AdminUsersScreen}
+      options={{ headerShown: false }}
+    />
+  </Stack.Navigator>
+);
+
+// Admin Bookings Stack
+const AdminBookingsStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: COLORS.background },
+      headerTintColor: COLORS.white,
+      headerTitleStyle: { fontWeight: '700' },
+      contentStyle: { backgroundColor: COLORS.background },
+    }}
+  >
+    <Stack.Screen
+      name="AdminBookingsMain"
+      component={AdminBookingsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="AdminBookingDetail"
+      component={AdminBookingDetailScreen}
+      options={{ title: 'Manage Booking' }}
+    />
+  </Stack.Navigator>
+);
+
+// Admin Services Stack
+const AdminServicesStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: COLORS.background },
+      headerTintColor: COLORS.white,
+      headerTitleStyle: { fontWeight: '700' },
+      contentStyle: { backgroundColor: COLORS.background },
+    }}
+  >
+    <Stack.Screen
+      name="AdminServicesMain"
+      component={AdminServicesScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="AdminServiceForm"
+      component={AdminServiceFormScreen}
+      options={({ route }) => ({
+        title: route.params?.service ? 'Edit Service' : 'New Service',
+      })}
+    />
+  </Stack.Navigator>
+);
+
+// Main Tab Navigator (regular users)
 const MainTabs = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
@@ -177,6 +276,49 @@ const MainTabs = () => (
   </Tab.Navigator>
 );
 
+// Admin Tab Navigator
+const AdminTabs = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      headerShown: false,
+      tabBarIcon: ({ focused, color }) => (
+        <TabIcon name={route.name} focused={focused} color={color} />
+      ),
+      tabBarActiveTintColor: COLORS.secondary,
+      tabBarInactiveTintColor: COLORS.textMuted,
+      tabBarStyle: {
+        backgroundColor: COLORS.surface,
+        borderTopColor: COLORS.secondary + '30',
+        borderTopWidth: 1,
+        height: 65,
+        paddingBottom: 8,
+        paddingTop: 8,
+      },
+      tabBarLabelStyle: {
+        fontSize: 11,
+        fontWeight: '600',
+      },
+    })}
+  >
+    <Tab.Screen name="Dashboard" component={AdminDashboardStack} />
+    <Tab.Screen
+      name="Users"
+      component={AdminUsersStack}
+    />
+    <Tab.Screen
+      name="AdminBookings"
+      component={AdminBookingsStack}
+      options={{ title: 'Bookings' }}
+    />
+    <Tab.Screen
+      name="AdminServices"
+      component={AdminServicesStack}
+      options={{ title: 'Services' }}
+    />
+    <Tab.Screen name="Profile" component={ProfileStack} />
+  </Tab.Navigator>
+);
+
 // Auth Stack
 const AuthStack = () => (
   <Stack.Navigator
@@ -192,7 +334,7 @@ const AuthStack = () => (
 
 // Main App Navigator
 const AppNavigator = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -206,7 +348,7 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainTabs /> : <AuthStack />}
+      {isAuthenticated ? (isAdmin ? <AdminTabs /> : <MainTabs />) : <AuthStack />}
     </NavigationContainer>
   );
 };
