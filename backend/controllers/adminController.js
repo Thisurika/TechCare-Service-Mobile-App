@@ -77,14 +77,17 @@ const getDashboardStats = async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     const { search, page = 1, limit = 20 } = req.query;
-    let query = { role: 'user' };
+    let query = { role: { $ne: 'admin' } };
 
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-      ];
+      query = {
+        role: { $ne: 'admin' },
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { phone: { $regex: search, $options: 'i' } },
+        ],
+      };
     }
 
     const total = await User.countDocuments(query);
@@ -104,6 +107,50 @@ const getAllUsers = async (req, res) => {
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Create new user (admin)
+// @route   POST /api/admin/users
+// @access  Admin
+const createUser = async (req, res) => {
+  try {
+    const { name, email, phone, password, role } = req.body;
+
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, email, phone, and password are required',
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email already exists',
+      });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      role: role || 'user',
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully!',
+      data: user,
+    });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error creating user',
+    });
   }
 };
 
@@ -390,6 +437,7 @@ const deleteService = async (req, res) => {
 module.exports = {
   getDashboardStats,
   getAllUsers,
+  createUser,
   getUserById,
   deleteUser,
   getAllBookings,

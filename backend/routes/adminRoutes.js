@@ -3,6 +3,7 @@ const { protect, adminOnly } = require('../middleware/authMiddleware');
 const {
   getDashboardStats,
   getAllUsers,
+  createUser,
   getUserById,
   deleteUser,
   getAllBookings,
@@ -24,6 +25,7 @@ router.get('/stats', getDashboardStats);
 
 // Users management
 router.get('/users', getAllUsers);
+router.post('/users', createUser);
 router.get('/users/:id', getUserById);
 router.delete('/users/:id', deleteUser);
 

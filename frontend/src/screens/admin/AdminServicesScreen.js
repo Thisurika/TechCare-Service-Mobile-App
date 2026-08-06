@@ -103,7 +103,7 @@ const AdminServicesScreen = ({ navigation }) => {
 
         <View style={styles.serviceMetaRow}>
           <Text style={styles.servicePrice}>
-            💰 ₹{item.estimatedPrice?.min?.toLocaleString('en-IN')} — ₹{item.estimatedPrice?.max?.toLocaleString('en-IN')}
+            💰 Rs. {item.estimatedPrice?.min?.toLocaleString('en-IN')} — Rs. {item.estimatedPrice?.max?.toLocaleString('en-IN')}
           </Text>
           <Text style={styles.serviceDuration}>⏱ {item.estimatedDuration}</Text>
         </View>

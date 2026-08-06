@@ -156,7 +156,7 @@ const AdminServiceFormScreen = ({ route, navigation }) => {
 
       {/* Price Range */}
       <View style={styles.field}>
-        <Text style={styles.label}>Price Range (₹) *</Text>
+        <Text style={styles.label}>Price Range (Rs.) *</Text>
         <View style={styles.priceRow}>
           <TextInput
             style={[styles.input, styles.priceInput]}

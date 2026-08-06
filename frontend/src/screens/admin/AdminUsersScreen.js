@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Modal,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, SIZES, SHADOWS } from '../../theme/colors';
@@ -20,6 +21,14 @@ const AdminUsersScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
+
+  // Modal State for Adding User
+  const [modalVisible, setModalVisible] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchUsers = async (searchQuery = '') => {
     try {
@@ -50,6 +59,33 @@ const AdminUsersScreen = () => {
   const handleSearch = () => {
     setLoading(true);
     fetchUsers(search);
+  };
+
+  const handleCreateUser = async () => {
+    if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
+      Alert.alert('Validation', 'Please fill in all fields (Name, Email, Phone, Password)');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await adminAPI.createUser({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password: password.trim(),
+      });
+      Alert.alert('Success', 'User created successfully');
+      setModalVisible(false);
+      setName('');
+      setEmail('');
+      setPhone('');
+      setPassword('');
+      fetchUsers(search);
+    } catch (error) {
+      Alert.alert('Error', error.response?.data?.message || 'Failed to create user');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDeleteUser = (userId, userName) => {
@@ -121,8 +157,16 @@ const AdminUsersScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>👥 Users Management</Text>
-        <Text style={styles.subtitle}>{total} total users</Text>
+        <View>
+          <Text style={styles.title}>👥 Users Management</Text>
+          <Text style={styles.subtitle}>{total} total users</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.addBtnText}>+ Add User</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Search */}
@@ -157,6 +201,81 @@ const AdminUsersScreen = () => {
           </View>
         }
       />
+
+      {/* Modal for Adding User */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>👤 Add New User</Text>
+
+            <Text style={styles.label}>Full Name *</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="e.g. John Doe"
+              placeholderTextColor={COLORS.textMuted}
+              value={name}
+              onChangeText={setName}
+            />
+
+            <Text style={styles.label}>Email Address *</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="e.g. john@example.com"
+              placeholderTextColor={COLORS.textMuted}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.label}>Phone Number *</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="e.g. 9876543210"
+              placeholderTextColor={COLORS.textMuted}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+
+            <Text style={styles.label}>Password *</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Min 6 characters"
+              placeholderTextColor={COLORS.textMuted}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+
+            <View style={styles.modalActionRow}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.submitBtn, submitting && styles.btnDisabled]}
+                onPress={handleCreateUser}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <ActivityIndicator color={COLORS.white} size="small" />
+                ) : (
+                  <Text style={styles.submitBtnText}>Create User</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -181,6 +300,9 @@ const styles = StyleSheet.create({
     padding: SIZES.padding,
     paddingTop: 50,
     paddingBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
     fontSize: SIZES.xxl,
@@ -191,6 +313,18 @@ const styles = StyleSheet.create({
     fontSize: SIZES.md,
     color: COLORS.textSecondary,
     marginTop: 4,
+  },
+  addBtn: {
+    backgroundColor: COLORS.primary,
+    borderRadius: SIZES.radius,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    ...SHADOWS.small,
+  },
+  addBtnText: {
+    color: COLORS.white,
+    fontSize: SIZES.md,
+    fontWeight: '700',
   },
   searchRow: {
     flexDirection: 'row',
@@ -293,6 +427,76 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: SIZES.base,
     color: COLORS.textMuted,
+  },
+
+  /* Modal Styles */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    padding: SIZES.paddingLg,
+  },
+  modalContent: {
+    backgroundColor: COLORS.surface,
+    borderRadius: SIZES.radiusLg,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
+    ...SHADOWS.large,
+  },
+  modalTitle: {
+    fontSize: SIZES.xl,
+    fontWeight: '800',
+    color: COLORS.white,
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: SIZES.sm,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+    marginTop: 8,
+  },
+  modalInput: {
+    backgroundColor: COLORS.background,
+    borderRadius: SIZES.radius,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: COLORS.white,
+    fontSize: SIZES.md,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
+  },
+  modalActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 20,
+  },
+  cancelBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: SIZES.radius,
+    marginRight: 10,
+  },
+  cancelBtnText: {
+    color: COLORS.textMuted,
+    fontWeight: '600',
+    fontSize: SIZES.md,
+  },
+  submitBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: SIZES.radius,
+    ...SHADOWS.small,
+  },
+  btnDisabled: {
+    opacity: 0.6,
+  },
+  submitBtnText: {
+    color: COLORS.white,
+    fontWeight: '700',
+    fontSize: SIZES.md,
   },
 });
 
