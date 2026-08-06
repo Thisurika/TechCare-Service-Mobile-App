@@ -13,7 +13,7 @@ import { bookingsAPI } from '../../api/api';
 import { COLORS, SIZES, SHADOWS } from '../../theme/colors';
 
 const ProfileScreen = ({ navigation }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshProfile } = useAuth();
   const [stats, setStats] = useState({ total: 0, active: 0, completed: 0 });
 
   const fetchStats = async () => {
@@ -33,6 +33,7 @@ const ProfileScreen = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       fetchStats();
+      if (refreshProfile) refreshProfile();
     }, [])
   );
 
