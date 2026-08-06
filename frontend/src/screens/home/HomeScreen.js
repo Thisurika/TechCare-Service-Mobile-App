@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   Dimensions,
+  Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
@@ -14,11 +15,42 @@ import { servicesAPI, bookingsAPI } from '../../api/api';
 import { COLORS, SIZES, SHADOWS, CATEGORY_INFO, getStatusColor } from '../../theme/colors';
 
 const { width } = Dimensions.get('window');
+const BANNER_WIDTH = width - SIZES.paddingLg * 2;
+
+const bannerSlides = [
+  {
+    id: '1',
+    title: 'TechCare Services',
+    subtitle: 'Expert repair for smartphones, laptops, TVs & home appliances',
+    buttonText: 'Browse Services →',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuazKjdET0M0qfWFNpB30RT5hsYqKhH9CCoz6ud8xf6c759GPoehqbTHM&s=10',
+    bgColor: '#1E88E5',
+  },
+  {
+    id: '2',
+    title: 'Laptop & Gadget Care',
+    subtitle: 'Screen replacement, SSD upgrades & motherboard diagnostics',
+    buttonText: 'Explore Repairs →',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaepIpHrApCOrKpQtpJBDskec9kjf9Q72j5A9YFlBzJFRN2PgMqTHB6vI&s=10',
+    bgColor: '#7E57C2',
+    category: 'laptop',
+  },
+  {
+    id: '3',
+    title: 'TV & Appliance Repair',
+    subtitle: 'Fast, reliable repairs for OLED, LED TVs & AC units',
+    buttonText: 'Book Technician →',
+    image: 'https://www.rightcliq.in/blogs/images/blogs/tv-repairing-tips.jpg',
+    bgColor: '#00897B',
+    category: 'television',
+  },
+];
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useAuth();
   const [activeBookings, setActiveBookings] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   const categories = Object.entries(CATEGORY_INFO);
 
@@ -92,21 +124,65 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Welcome Banner */}
-        <View style={styles.banner}>
-          <View style={styles.bannerContent}>
-            <Text style={styles.bannerTitle}>TechCare Services</Text>
-            <Text style={styles.bannerSubtitle}>
-              Expert repair for smartphones, laptops, TVs & home appliances
-            </Text>
-            <TouchableOpacity
-              style={styles.bannerButton}
-              onPress={() => navigation.navigate('Services')}
-            >
-              <Text style={styles.bannerButtonText}>Browse Services →</Text>
-            </TouchableOpacity>
+        {/* Welcome Banner Carousel */}
+        <View style={styles.bannerContainer}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={(e) => {
+              const slide = Math.round(
+                e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+              );
+              if (slide !== activeSlide) setActiveSlide(slide);
+            }}
+            scrollEventThrottle={16}
+          >
+            {bannerSlides.map((slide) => (
+              <View
+                key={slide.id}
+                style={[styles.banner, { width: BANNER_WIDTH, backgroundColor: slide.bgColor }]}
+              >
+                <View style={styles.bannerContent}>
+                  <Text style={styles.bannerTitle}>{slide.title}</Text>
+                  <Text style={styles.bannerSubtitle}>{slide.subtitle}</Text>
+                  <TouchableOpacity
+                    style={styles.bannerButton}
+                    onPress={() => {
+                      if (slide.category) {
+                        navigation.navigate('Services', {
+                          screen: 'ServicesMain',
+                          params: { category: slide.category },
+                        });
+                      } else {
+                        navigation.navigate('Services');
+                      }
+                    }}
+                  >
+                    <Text style={styles.bannerButtonText}>{slide.buttonText}</Text>
+                  </TouchableOpacity>
+                </View>
+                <Image
+                  source={{ uri: slide.image }}
+                  style={styles.bannerImage}
+                  resizeMode="cover"
+                />
+              </View>
+            ))}
+          </ScrollView>
+
+          {/* Carousel Dots Indicator */}
+          <View style={styles.paginationDots}>
+            {bannerSlides.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  activeSlide === index ? styles.activeDot : styles.inactiveDot,
+                ]}
+              />
+            ))}
           </View>
-          <Text style={styles.bannerEmoji}>🔧</Text>
         </View>
       </View>
 
@@ -270,16 +346,20 @@ const styles = StyleSheet.create({
   notifIcon: {
     fontSize: 20,
   },
+  bannerContainer: {
+    marginBottom: 4,
+  },
   banner: {
-    backgroundColor: COLORS.primary,
     borderRadius: SIZES.radiusLg,
     padding: SIZES.paddingLg,
     flexDirection: 'row',
     alignItems: 'center',
+    overflow: 'hidden',
     ...SHADOWS.medium,
   },
   bannerContent: {
     flex: 1,
+    paddingRight: 10,
   },
   bannerTitle: {
     fontSize: SIZES.xl,
@@ -289,25 +369,50 @@ const styles = StyleSheet.create({
   },
   bannerSubtitle: {
     fontSize: SIZES.sm,
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.9)',
     lineHeight: 18,
     marginBottom: 12,
   },
   bannerButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   bannerButtonText: {
     color: COLORS.white,
     fontWeight: '700',
     fontSize: SIZES.sm,
   },
-  bannerEmoji: {
-    fontSize: 60,
-    marginLeft: 10,
+  bannerImage: {
+    width: 85,
+    height: 85,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  paginationDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  dot: {
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    width: 22,
+    backgroundColor: COLORS.primary,
+  },
+  inactiveDot: {
+    width: 8,
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   section: {
     paddingHorizontal: SIZES.paddingLg,
