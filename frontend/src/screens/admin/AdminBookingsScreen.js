@@ -126,7 +126,7 @@ const AdminBookingsScreen = ({ navigation }) => {
       {item.totalCost > 0 && (
         <View style={styles.costRow}>
           <Text style={styles.costLabel}>💰 Cost:</Text>
-          <Text style={styles.costValue}>₹{item.totalCost.toLocaleString('en-IN')}</Text>
+          <Text style={styles.costValue}>Rs. {item.totalCost.toLocaleString('en-IN')}</Text>
         </View>
       )}
 
