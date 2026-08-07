@@ -105,9 +105,6 @@ JWT_SECRET=your_jwt_secret_key_here
 | GET | `/api/support/faqs` | Get FAQs |
 | GET | `/api/support/tips` | Get maintenance tips |
 
-## 👨‍💻 Author
-
-TechCare Services Development Team
 
 ## 📄 License
 
